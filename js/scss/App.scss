@@ -1,0 +1,43 @@
+@import '~bootstrap/scss/bootstrap';
+
+@mixin absolute() {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+body {
+    margin: 0 1rem;
+}
+
+.row:not(:last-child) {
+    padding-bottom: 1rem;
+}
+
+.nav {
+    margin-bottom: 1rem;
+}
+
+#main {
+    margin: 2rem auto;
+    max-width: 8in;
+}
+
+#controls {
+    padding-bottom: 2rem;
+}
+
+#control-form {
+    width: 100%;
+}
+
+#data {
+    //max-width: 3in;
+    //margin: 0 auto;
+}
+
+.reducible {
+    background-color: #bdf !important;
+}
