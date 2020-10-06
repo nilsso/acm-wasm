@@ -43,7 +43,8 @@ function Controls(props: ControlsProps): Element {
     const [ validB, setValidB ] = useState(false);
     const [ validL, setValidL ] = useState(false);
 
-    const [ validBList, setValidBList ] = useState(acmWasm.valid_b(a));
+    //const [ validBList, setValidBList ] = useState(acmWasm.valid_b(a));
+    const [ validBList, setValidBList ] = useState("Something");
 
     useEffect(() => {
         const a = inputA ? Number(inputA) : DEFAULT_A;
@@ -51,7 +52,7 @@ function Controls(props: ControlsProps): Element {
 
         if (a) {
             setTempA(a);
-            setValidBList(acmWasm.valid_b(a));
+            //setValidBList(acmWasm.valid_b(a));
         } else {
             setValidA(false);
         }

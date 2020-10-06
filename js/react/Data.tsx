@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Col, Container, Row, Table } from 'react-bootstrap';
 import LaTeX from 'react-latex';
 
-const factorizations_string = (factorizations) => {
-    return '(' + factorizations.map(f => f.join(',')).join('),(') + ')';
-};
+//const factorizations_string = (factorizations) => {
+    //return '(' + factorizations.map(f => f.join(',')).join('),(') + ')';
+//};
 
 type DataProps = { acmWasm, a, b, l, setErrorIndex, setErrorElement }
 function Data(props: DataProps): Element {
@@ -13,9 +13,10 @@ function Data(props: DataProps): Element {
     const [ rows, setRows ] = useState(<React.Fragment></React.Fragment>);
 
     useEffect(() => {
-        const data = acmWasm.acm_data(a, b, l);
-        //const rows = data.map(({i, e, factorizations, atomic}) => {
+        const data = acmWasm.acm_data(BigInt(a), BigInt(b), BigInt(l));
         let found_error = false;
+        //const rows = data.map(({i, e, factorizations, atomic}) => {
+        //const rows = data.map(({i, e, atomic, factorizations, classification, error}) => {
         const rows = data.map(({i, e, atomic, classification, error}) => {
             let style;
             if (atomic) {
@@ -43,7 +44,7 @@ function Data(props: DataProps): Element {
     }, [acmWasm, a, b, l]);
 
     return (
-        <Table id="data" responsive striped borderless size="sm">
+        <Table id="data" striped borderless size="sm">
             <thead>
                 <tr>
                     <th><LaTeX>$i$</LaTeX></th>

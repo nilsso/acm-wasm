@@ -21,14 +21,15 @@ pub fn main_js() -> Result<(), JsValue> {
 }
 
 #[wasm_bindgen]
-pub fn valid_b(a: u32) -> String {
+pub fn valid_b(a: u64) -> String {
     let list: String = if a > 1 {
-        let q = a * a - a;
-        acm::divisors(q)
-            .into_iter()
-            .filter_map(|d| (a <= d).then(|| d.to_string()))
-            .collect::<Vec<String>>()
-            .join(",")
+        "Something!".to_owned()
+    //let q = a * a - a;
+    //acm::divisors(q)
+    //.into_iter()
+    //.filter_map(|d| (a <= d).then(|| d.to_string()))
+    //.collect::<Vec<String>>()
+    //.join(",")
     } else {
         "1,2,3,4,5,\\ldots".to_owned()
     };
@@ -37,47 +38,33 @@ pub fn valid_b(a: u32) -> String {
 
 use acm::ArithmeticCongruenceMonoid as ACM;
 
-#[wasm_bindgen]
-pub fn acm_elements(a: u32, b: u32, l: u32) -> Option<Vec<u32>> {
-    if let Ok(acm) = ACM::new(a, b) {
-        //if true {
-        //Some(vec![1, 2, 3])
-        Some(acm.n_elements(l, a))
+// WARNING: Probably only works for a=4 and b=6 for now
+fn clasify_n(a: u64, b: u64, n: u64) -> Option<String> {
+    if n % a == 0 {
+        if n % (a * b) == (a * a) {
+            Some("$[16]_{24}$".to_owned())
+        } else if (n / a) % b == 1 {
+            Some("$[4]_6 [5]_6 [5]_6$".to_owned())
+        } else {
+            None
+        }
     } else {
         None
     }
 }
 
-// WARNING: This is not generalized! Only works for a=4 and b=6 for now
-fn clasify_n(a: u32, b: u32, n: u32) -> Option<String> {
-    use std::iter::repeat;
-    if n % (a * b) == (a * a) {
-        Some("$[16]_{24}$".to_owned())
-    } else {
-        let prime_classes: Vec<u32> = acm::factorize(n)
-            .into_iter()
-            .flat_map(|(p, q)| repeat(p % b).take(q as usize))
-            .collect();
-        let mut first = prime_classes.clone();
-        let last = first.split_off(2);
-        let is_correct = first.as_slice() == [2, 2] && last.into_iter().product::<u32>() % 25 == 0;
-        is_correct.then_some("$[4]_6 [5]_6 [5]_6$".to_owned())
-    }
-}
-
-//#[wasm_bindgen]
 #[derive(Serialize, Deserialize)]
 pub struct DataRow {
     pub i: usize,
-    pub e: u32,
-    //pub factorizations: Vec<Vec<u32>>,
+    pub e: u64,
+    //pub factorizations: Vec<Vec<u64>>,
     pub atomic: bool,
     pub classification: Option<String>,
     pub error: bool,
 }
 
 #[wasm_bindgen]
-pub fn acm_data(a: u32, b: u32, l: u32) -> JsValue {
+pub fn acm_data(a: u64, b: u64, l: u64) -> JsValue {
     let mut acm = ACM::new(a, b).unwrap();
 
     let data: Vec<DataRow> = acm
@@ -85,13 +72,13 @@ pub fn acm_data(a: u32, b: u32, l: u32) -> JsValue {
         .into_iter()
         .enumerate()
         .map(|(i, e)| {
-            //let fs = acm.factorize(e).clone();
+            let fs = acm.factorize(e).clone();
             let atomic = acm.atomic(e);
-            let classification = clasify_n(a, b, e);
+            let classification = if !atomic { clasify_n(a, b, e) } else { None };
             let error = !atomic && classification.is_none();
             DataRow {
                 i: i,
-                e: e as u32,
+                e: e as u64,
                 //factorizations: fs,
                 atomic,
                 classification,
@@ -105,25 +92,25 @@ pub fn acm_data(a: u32, b: u32, l: u32) -> JsValue {
 
 #[derive(Serialize, Deserialize)]
 pub struct StudyData {
-    pub elements: Vec<u32>,
-    pub primes: Vec<u32>,
+    pub elements: Vec<u64>,
+    pub primes: Vec<u64>,
 }
 
-const L: u32 = 10;
+const L: u64 = 10;
 
 #[wasm_bindgen]
-pub fn acm_study(a: u32, b: u32) -> JsValue {
+pub fn acm_study(a: u64, b: u64) -> JsValue {
     use num::integer::gcd;
     use primal_sieve::Primes;
 
     let acm = ACM::new(a, b).unwrap();
 
-    let elements: Vec<u32> = acm.n_elements(L, a);
+    let elements: Vec<u64> = acm.n_elements(L, a);
 
     let primes = Primes::all()
         .filter_map(|p| {
-            let p = p as u32;
-            (gcd(p as u32, b) == 1).then_some(p)
+            let p = p as u64;
+            (gcd(p as u64, b) == 1).then_some(p)
         })
         .take(10)
         .collect();
