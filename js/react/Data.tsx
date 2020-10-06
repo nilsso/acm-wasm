@@ -6,20 +6,35 @@ const factorizations_string = (factorizations) => {
     return '(' + factorizations.map(f => f.join(',')).join('),(') + ')';
 };
 
-type DataProps = { acmWasm, a, b, l }
+type DataProps = { acmWasm, a, b, l, setErrorIndex, setErrorElement }
 function Data(props: DataProps): Element {
-    const { acmWasm, a, b, l } = props;
+    const { acmWasm, a, b, l, setErrorIndex, setErrorElement } = props;
 
     const [ rows, setRows ] = useState(<React.Fragment></React.Fragment>);
 
     useEffect(() => {
         const data = acmWasm.acm_data(a, b, l);
-        const rows = data.map(({i, e, factorizations, atomic}) => {
+        //const rows = data.map(({i, e, factorizations, atomic}) => {
+        let found_error = false;
+        const rows = data.map(({i, e, atomic, classification, error}) => {
+            let style;
+            if (atomic) {
+                style = '';
+            } else if (!error) {
+                style = 'reducible';
+            } else {
+                style = 'error';
+                if (!found_error) {
+                    setErrorIndex(i);
+                    setErrorElement(e);
+                    found_error = true;
+                }
+            }
             return (
-                <tr key={i} className={atomic ? '' : 'reducible'}>
+                <tr key={i} className={style}>
                     <td>{i}</td>
                     <td>{e}</td>
-                    <td>{factorizations_string(factorizations)}</td>
+                    <td><LaTeX>{classification || ""}</LaTeX></td>
                 </tr>
             );
         });
@@ -33,7 +48,7 @@ function Data(props: DataProps): Element {
                 <tr>
                     <th><LaTeX>$i$</LaTeX></th>
                     <th><LaTeX>{`$a_i\\in M_{${a},${b}}$`}</LaTeX></th>
-                    <th>Factorizations</th>
+                    <th>Classification</th>
                 </tr>
             </thead>
             <tbody>

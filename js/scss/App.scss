@@ -38,6 +38,19 @@ body {
     //margin: 0 auto;
 }
 
+.danger-card {
+    color: white !important;
+    background-color: $danger !important;
+
+    a {
+        color: #faa;
+    }
+}
+
 .reducible {
     background-color: #bdf !important;
+}
+
+.error {
+    background-color: #fbb !important;
 }

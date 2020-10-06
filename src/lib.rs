@@ -1,7 +1,7 @@
 #![feature(bool_to_option)]
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
-//use web_sys::console;
+use web_sys::console;
 
 #[cfg(feature = "wee_alloc")]
 #[global_allocator]
@@ -48,13 +48,32 @@ pub fn acm_elements(a: u32, b: u32, l: u32) -> Option<Vec<u32>> {
     }
 }
 
+// WARNING: This is not generalized! Only works for a=4 and b=6 for now
+fn clasify_n(a: u32, b: u32, n: u32) -> Option<String> {
+    use std::iter::repeat;
+    if n % (a * b) == (a * a) {
+        Some("$[16]_{24}$".to_owned())
+    } else {
+        let prime_classes: Vec<u32> = acm::factorize(n)
+            .into_iter()
+            .flat_map(|(p, q)| repeat(p % b).take(q as usize))
+            .collect();
+        let mut first = prime_classes.clone();
+        let last = first.split_off(2);
+        let is_correct = first.as_slice() == [2, 2] && last.into_iter().product::<u32>() % 25 == 0;
+        is_correct.then_some("$[4]_6 [5]_6 [5]_6$".to_owned())
+    }
+}
+
 //#[wasm_bindgen]
 #[derive(Serialize, Deserialize)]
 pub struct DataRow {
     pub i: usize,
     pub e: u32,
-    pub factorizations: Vec<Vec<u32>>,
+    //pub factorizations: Vec<Vec<u32>>,
     pub atomic: bool,
+    pub classification: Option<String>,
+    pub error: bool,
 }
 
 #[wasm_bindgen]
@@ -66,13 +85,17 @@ pub fn acm_data(a: u32, b: u32, l: u32) -> JsValue {
         .into_iter()
         .enumerate()
         .map(|(i, e)| {
-            let fs = acm.factorize(e).clone();
+            //let fs = acm.factorize(e).clone();
             let atomic = acm.atomic(e);
+            let classification = clasify_n(a, b, e);
+            let error = !atomic && classification.is_none();
             DataRow {
                 i: i,
                 e: e as u32,
-                factorizations: fs,
+                //factorizations: fs,
                 atomic,
+                classification,
+                error,
             }
         })
         .collect();
@@ -93,7 +116,7 @@ pub fn acm_study(a: u32, b: u32) -> JsValue {
     use num::integer::gcd;
     use primal_sieve::Primes;
 
-    let mut acm = ACM::new(a, b).unwrap();
+    let acm = ACM::new(a, b).unwrap();
 
     let elements: Vec<u32> = acm.n_elements(L, a);
 

@@ -4,9 +4,9 @@ import { Button, Col, Form } from 'react-bootstrap';
 
 import { DEFAULT_A, DEFAULT_B, DEFAULT_L } from './Root';
 
-type FieldProps = { label, placeholder, value, setValue, isValid, feedback };
+type FieldProps = { label, placeholder, value, setValue, isValid, feedback, disabled };
 function Field(props: FieldProps) {
-    const { label, placeholder, value, setValue, isValid, feedback } = props;
+    const { label, placeholder, value, setValue, isValid, feedback, disabled } = props;
 
     return (
         <Form.Group as={Col} xs={16} md={4}>
@@ -17,6 +17,7 @@ function Field(props: FieldProps) {
                 value={value}
                 isInvalid={!isValid(value)}
                 onChange={e => setValue(e.target.value)}
+                disabled={disabled}
             >
             </Form.Control>
             <Form.Control.Feedback type="invalid">
@@ -26,9 +27,9 @@ function Field(props: FieldProps) {
     );
 }
 
-type ControlsProps = { acmWasm, a, setA, b, setB, setL };
+type ControlsProps = { acmWasm, disabled, a, setA, b, setB, setL };
 function Controls(props: ControlsProps): Element {
-    const { acmWasm, a, setA, b, setB, setL } = props;
+    const { acmWasm, disabled, a, setA, b, setB, setL } = props;
 
     const [ inputA, setInputA ] = useState("");
     const [ inputB, setInputB ] = useState("");
@@ -75,16 +76,16 @@ function Controls(props: ControlsProps): Element {
 
 
     const labels = [
-        [<LaTeX>Component $a$</LaTeX>, DEFAULT_A, inputA, setInputA, () => validA, <LaTeX>$a\ge 1$</LaTeX>],
-        [<LaTeX>Component $b$</LaTeX>, DEFAULT_B, inputB, setInputB, () => validB, <LaTeX>{validBList}</LaTeX>],
-        ["Number of elements",         DEFAULT_L, inputL, setInputL, () => validL, "Must be a positive integer"]
+        [<LaTeX>Component $a$</LaTeX>, DEFAULT_A, inputA, setInputA, () => validA, <LaTeX>$a\ge 1$</LaTeX>, disabled],
+        [<LaTeX>Component $b$</LaTeX>, DEFAULT_B, inputB, setInputB, () => validB, <LaTeX>{validBList}</LaTeX>, disabled],
+        ["Number of elements",         DEFAULT_L, inputL, setInputL, () => validL, "Must be a positive integer", false]
     ];
 
     return (
         <Form noValidate id="control-form">
             <Form.Row>
                 {
-                    labels.map(([label, placeholder, value, setValue, isValid, feedback], i) => {
+                    labels.map(([label, placeholder, value, setValue, isValid, feedback, disabled], i) => {
                         return (
                             <Field key={i}
                                 label={label}
@@ -93,6 +94,7 @@ function Controls(props: ControlsProps): Element {
                                 setValue={setValue}
                                 isValid={isValid}
                                 feedback={feedback}
+                                disabled={disabled}
                             />
                             );
                     })
